@@ -1,0 +1,13 @@
+1670247331923	geckodriver	INFO	Listening on 127.0.0.1:60429
+1670247332460	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "--remote-debugging-port" "48075" "--remote-allow-hosts" "localhost" "-no-remote" "-profile" "/tmp/rust_mozprofilesvIpy9"
+[GFX1-]: glxtest: VA-API test failed: failed to initialise VAAPI connection.
+ATTENTION: default value of option mesa_glthread overridden by environment.
+1670247333078	Marionette	INFO	Marionette enabled
+1670247333082	Marionette	INFO	Listening on port 46677
+Read port: 46677
+WebDriver BiDi listening on ws://127.0.0.1:48075
+1670247333219	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at /tmp/rust_mozprofilesvIpy9/search.json.mozlz4", (void 0)))
+DevTools listening on ws://127.0.0.1:48075/devtools/browser/7841a90d-1664-4854-8ca3-364544fda63c
+1670247412563	Marionette	INFO	Stopped listening on port 46677
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
