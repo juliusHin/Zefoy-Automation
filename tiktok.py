@@ -1,10 +1,15 @@
 #Developed by github.com/useragents
 #This script was made for educational purposes. I am not responsible for your actions using this script. This code is a few months old, hence why it may not appear as professional but still works to this day.
+
+
 try:
     from selenium import webdriver
+    from selenium.webdriver.common.by import By
     import time, os, ctypes, requests
     from colorama import Fore, init
     import warnings, selenium, platform
+    from selenium.webdriver.chrome.service import Service as ChromeService
+    from webdriver_manager.chrome import ChromeDriverManager
 except ImportError:
     input("Error while importing modules. Please install the modules in requirements.txt")
 
@@ -34,7 +39,13 @@ class automator:
     def __init__(self):
         options = webdriver.ChromeOptions()
         options.add_argument('--ignore-certificate-errors')
+        options.add_argument('--ignore-ssl-errors=yes')
         options.add_experimental_option("excludeSwitches", ["enable-logging"])
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument('--allow-insecure-localhost')  # differ on driver version. can ignore.
+        options.add_argument("disable-infobars");
+        caps = options.to_capabilities()
+        caps["acceptInsecureCerts"] = True
         self.xpaths = {
             "followers": "/html/body/div[4]/div[1]/div[3]/div/div[1]/div/button",
             "likes": "/html/body/div[4]/div[1]/div[3]/div/div[2]/div/button",
@@ -42,7 +53,8 @@ class automator:
             "shares": "/html/body/div[4]/div[1]/div[3]/div/div[5]/div/button"
         }
         try:
-            self.driver = webdriver.Chrome(options = options)
+            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options,
+                                           desired_capabilities=caps)
         except Exception as e:
             self.error(f"Error trying to load web driver: {e}")
         self.status = {}
@@ -53,7 +65,8 @@ class automator:
     def check_status(self):
         for xpath in self.xpaths:
             value = self.xpaths[xpath]
-            element = self.driver.find_element_by_xpath(value)
+            # element = self.driver.find_element_by_xpath(value)
+            element = self.driver.find_element(by=By.XPATH, value=value)
             if not element.is_enabled():
                 self.status.update({xpath: "[OFFLINE]"})
             else:
@@ -99,13 +112,14 @@ class automator:
 
     def check_submit(self, div):
         remaining = f"/html/body/div[4]/div[{div}]/div/div/h4"
+
         try:
-            element = self.driver.find_element_by_xpath(remaining)
+            element = self.driver.find_element(by=By.XPATH, value=remaining)
         except:
             return None, None
         if "READY" in element.text:
             return True, True
-        if "seconds for your next submit" in element.text:
+        if "seconds for your next submit!" in element.text:
             output = element.text.split("Please wait ")[1].split(" for")[0]
             minutes = element.text.split("Please wait ")[1].split(" ")[0]
             seconds = element.text.split("(s) ")[1].split(" ")[0]
@@ -138,27 +152,29 @@ class automator:
 
     def send_bot(self, video_url, bot, div):
         try:
-            self.driver.find_element_by_xpath(self.xpaths[bot]).click()
-            time.sleep(0.5)
+            self.driver.find_element(by=By.XPATH, value=self.xpaths[bot]).click()
+            time.sleep(2)
         except:
             pass
-        enter_link_xpath = f"/html/body/div[4]/div[{div}]/div/form/div/input" 
-        link = self.driver.find_element_by_xpath(enter_link_xpath)
+        enter_link_xpath = f"/html/body/div[4]/div[{div}]/div/form/div/input"
+        link = self.driver.find_element(by=By.XPATH, value=enter_link_xpath)
         link.clear()
         link.send_keys(video_url)
-        self.driver.find_element_by_xpath(f"/html/body/div[4]/div[{div}]/div/form/div/div/button").click() #Search button
-        time.sleep(0.8)
+        self.driver.find_element(by=By.XPATH,
+                                 value=f"/html/body/div[4]/div[{div}]/div/form/div/div/button").click()  # Search button
+        time.sleep(2)
         send_button_xpath = f"/html/body/div[4]/div[{div}]/div/div/div[1]/div/form/button"
         try:
-            self.driver.find_element_by_xpath(send_button_xpath).click() 
+            self.driver.find_element(by=By.XPATH, value=send_button_xpath).click()
         except selenium.common.exceptions.NoSuchElementException:
             self.wait_for_ratelimit(bot, div)
-            self.driver.find_element_by_xpath(f"/html/body/div[4]/div[{div}]/div/form/div/div/button").click() #Search button
+            self.driver.find_element(by=By.XPATH,
+                                     value=f"/html/body/div[4]/div[{div}]/div/form/div/div/button").click()  # Search button
             time.sleep(0.8)
-            self.driver.find_element_by_xpath(send_button_xpath).click()
+            self.driver.find_element(by=By.XPATH, value=send_button_xpath).click()
         time.sleep(3)
         try:
-            s = self.driver.find_element_by_xpath(f"/html/body/div[4]/div[{div}]/div/div/span")
+            s = self.driver.find_element(by=By.XPATH, value=f"/html/body/div[4]/div[{div}]/div/div/span")
             if "Too many requests" in s.text:
                 self.ratelimits += 1
                 self.update_cooldown(50, bot, True)
@@ -202,7 +218,7 @@ class automator:
         if clear == "cls":
             ctypes.windll.kernel32.SetConsoleTitleW("TikTok AIO | Developed by @useragents on Github")
         self.driver.get("https://zefoy.com/")
-        time.sleep(2)
+        time.sleep(5)
         if "502 Bad Gateway" in self.driver.page_source:
             os.system(clear)
             print(ascii_text)
